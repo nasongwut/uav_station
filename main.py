@@ -6,7 +6,7 @@ import random
 
 FRAME_SYNC = b'\x55'
 SERIAL_PORT = serial.Serial(
-    port="COM6",
+    port="COM20",
     baudrate=115200,
     bytesize=serial.EIGHTBITS,
     parity=serial.PARITY_NONE,
@@ -24,6 +24,11 @@ async def get_serial():
     msg =  SERIAL_PORT.read()
     if msg == FRAME_SYNC:
         msg =  SERIAL_PORT.read(size)
+
+        # print('DECODE')
+        # print(msg)
+        unpack_st = struct.unpack('HHHHHHHHHHH',msg)
+        print(unpack_st)
 
 
 
