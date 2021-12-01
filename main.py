@@ -22,8 +22,6 @@ def get_serial():
         payload = base64.b64encode(msg).decode('ascii')
     return payload
 
-
-
 def post_serial():
     START = 85
     BYTESTOP = 90
@@ -31,14 +29,15 @@ def post_serial():
     SERIAL_PORT.write(bytes([START]))
     for i in values:
         SERIAL_PORT.write(bytes([i]))
-        time.sleep(0.001)
-    # print('----------------SEND----------------')
+        # time.sleep(0.001)
+    print('----------------SEND----------------')
     
     return
 
 def on_message(ws, message):
     # print('---------------------income msg'--------------------')
     pass #print(message)
+
 
 def on_error(ws, error):
     pass #print(error)
@@ -47,20 +46,30 @@ def on_close(ws, close_status_code, close_msg):
     pass #print("### closed ###")
 
 def on_open(ws):
-    def run(*args):
+    def th1run(*args):
+        print('THREAD 1 is run')
         while True:
-            post_serial()
             sta_state = get_serial()
             if sta_state != "":
                 msg = {'type':'Station','bin':sta_state}
                 packet = json.dumps(msg)
                 # print(packet)
                 ws.send(packet)
-                time.sleep(0.001)
+                _thread.start_new_thread(th2run, ())
+                # time.sleep(0.001)
         time.sleep(1)
         ws.close()
         print("thread terminating...")
-    _thread.start_new_thread(run, ())
+    def th2run(*args):
+        while True:
+            # print("THREAD 2 is run")
+            post_serial()
+            pass
+        # time.sleep(1)
+
+
+    _thread.start_new_thread(th1run, ())
+    
 
 if __name__ == "__main__":
     # websocket.enableTrace(True)
