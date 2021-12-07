@@ -9,7 +9,7 @@ PACKETSIZE = struct.calcsize('iiiiiiiiiii')
 
 
 SERIAL_PORT = serial.Serial(
-    port="COM31",
+    port="COM6",
     baudrate=115200,
     bytesize=serial.EIGHTBITS,
     parity=serial.PARITY_NONE,
@@ -40,26 +40,9 @@ def read_serial():
     datas = SERIAL_PORT.read()
     for i in datas:
         if i == STARTBIT:
-
             data = SERIAL_PORT.read(PACKETSIZE)
             payload = base64.b64encode(data).decode('ascii')
-            # print(payload)
-            # unpack_st = struct.unpack('iiiiiiiiiii',data)
-            # data_dict = {"src":unpack_st[0],
-            #     "dst":unpack_st[1],
-            #     "seq":unpack_st[2],
-            #     "cmd":unpack_st[3],
-            #     "sta":unpack_st[4],
-            #     "motor_x":unpack_st[5],
-            #     "motor_y":unpack_st[6],
-            #     "sta_volt":unpack_st[7],
-            #     "sta_amp":unpack_st[8],
-            #     "uav_volt":unpack_st[9],
-            #     "uav_amp":unpack_st[10]
-            #     }
-            # print('-------------------------')
-            # print(payload)
-
+            print(len(data))
             return payload
 
 
@@ -67,6 +50,7 @@ def read_serial():
 
 
 def on_message(ws, message):
+    # pass
     data = json.loads(message)
     if data['type']== 'uav':
         print('--------Command------')
@@ -93,10 +77,12 @@ def on_close(ws, close_status_code, close_msg):
 def on_open(ws):
     def run(*args):
         while True:
+            upacket = {'type':'station','bin':''}
             data = read_serial()
-            upacket = {'type':'station','bin':data}
+            upacket['bin'] = data
             # print(upacket)
-            ws.send(json.dumps(upacket))
+            if data != None:
+                ws.send(json.dumps(upacket))
             time.sleep(0.1)
             
         # for i in range(3):
